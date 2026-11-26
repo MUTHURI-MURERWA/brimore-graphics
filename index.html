@@ -125,14 +125,14 @@ $('gal').onclick=function(e){var t=e.target.closest('.tile');if(!t)return;var d=
 $('send').onclick=async function(){var n=$('n').value.trim(),c=$('c').value.trim(),m=$('m').value.trim(),o=$('ok');
 if(!n||!c||!m){o.style.color='#e74c3c';o.textContent='Please fill in your name, contact and message.';return}
 if(sb){var r=await sb.from('inquiries').insert({name:n,contact:c,type:$('t').value,service:services[$('s').value].n,message:m});
-if(r.error){o.style.color='#e74c3c';o.textContent='Sorry, it could not be sent. Please try again.';return}}
+if(r.error){o.style.color='#e74c3c';o.textContent='Error: '+r.error.message;return}}
 o.style.color='#2ecc71';o.textContent='Thank you, '+n+'! Your '+$('t').value.toLowerCase()+' was received.';$('n').value=$('c').value=$('m').value=''};
 function note(t,bad){var s=$('st');s.style.color=bad?'#e74c3c':'#2ecc71';s.textContent=t}
 async function init(){if(sb){var s=await sb.auth.getSession();admin=!!(s.data&&s.data.session)}await load()}
 $('adminBtn').onclick=function(){admin?(rAdmin(),om('am')):om('lm')};
 $('login').onclick=async function(){var e=$('le');if(!sb){e.textContent='Backend not connected yet.';return}
 var r=await sb.auth.signInWithPassword({email:$('u').value.trim(),password:$('p').value});
-if(r.error){e.textContent='Wrong email or password.';return}
+if(r.error){e.textContent=r.error.message;return}
 admin=true;e.textContent='';$('p').value='';cm('lm');rAdmin();om('am')};
 $('logout').onclick=async function(){if(sb)await sb.auth.signOut();admin=false;cm('am')};
 document.querySelector('#am .tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;['as','ad','ai','ac'].forEach(function(x){$(x).hidden=x!=t})};
