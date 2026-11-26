@@ -94,7 +94,7 @@ var $=function(i){return document.getElementById(i)};
 function cm(i){$(i).classList.remove('on')}function om(i){$(i).classList.add('on')}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 /* ===== PASTE YOUR SUPABASE DETAILS HERE ===== */
-var SB_URL='https://chnndhhcgkrspilkseqs.supabase.co/rest/v1/',SB_KEY='sb_publishable_son3JcCiYoFksq6pB6eDzA_LwPbc-9v',sb=null;
+var SB_URL='https://chnndhhcgkrspilkseqs.supabase.co',SB_KEY='sb_publishable_son3JcCiYoFksq6pB6eDzA_LwPbc-9v',sb=null;
 try{if(SB_URL.indexOf('http')==0)sb=supabase.createClient(SB_URL,SB_KEY)}catch(e){}
 var services=[
 {n:'Simple designs',p:'KSh 500 – 1,000',d:'Simple posters, basic social media posts, text editing, minor logo adjustments, simple flyers and certificate editing.'},
