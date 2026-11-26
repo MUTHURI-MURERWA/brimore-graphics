@@ -71,7 +71,7 @@ footer{text-align:center;color:var(--mu);padding:30px 5vw;border-top:1px solid v
 <div class="two"><div><label>Type</label><select id="t"><option>Inquiry</option><option>Order</option></select></div><div><label>Service</label><select id="s"></select></div></div>
 <label>Message / project details</label><textarea id="m" rows="4"></textarea>
 <p style="margin:14px 0 0"><button id="send">Send</button></p><div class="msg" id="ok"></div></div>
-<div class="card"><h3>Get in touch</h3><p>Phone: <b>+254 745 579 265</b><br>Email: <b>murithibrian737@gmail.com</b><br>Social: Facebook · Instagram · WhatsApp</p><p style="font-size:13px">Replace these contact details with the company’s real ones.</p></div>
+<div class="card"><h3>Get in touch</h3><p>Phone: <b>+254 7XX XXX XXX</b><br>Email: <b>info@brimoregraphics.co.ke</b><br>Social: Facebook · Instagram · WhatsApp</p><p style="font-size:13px">Replace these contact details with the company’s real ones.</p></div>
 </div></section>
 
 <footer>© 2026 BRIMORE GRAPHICS ENTERPRISE · Works on phone, tablet and desktop</footer>
@@ -79,56 +79,84 @@ footer{text-align:center;color:var(--mu);padding:30px 5vw;border-top:1px solid v
 <div class="modal" id="dm"><div class="box"><div class="big" id="dbig"></div><h3 id="dt" style="margin:0"></h3><p id="dd" style="color:var(--mu)"></p><button class="o" onclick="cm('dm')">Close</button></div></div>
 
 <div class="modal" id="lm"><div class="box" style="max-width:380px"><h3 style="margin:0 0 6px">Administrator login</h3>
-<label>Username</label><input id="u" autocomplete="username"><label>Password</label><input id="p" type="password" autocomplete="current-password">
+<label>Admin email</label><input id="u" type="email" autocomplete="username"><label>Password</label><input id="p" type="password" autocomplete="current-password">
 <p style="margin:16px 0 0;display:flex;gap:8px"><button id="login">Log in</button><button class="o" onclick="cm('lm')">Cancel</button></p><div class="msg" id="le" style="color:#e74c3c"></div>
-<p style="font-size:12px;color:var(--mu)">Demo prototype login: admin / admin123. A live site needs a server-side login.</p></div></div>
+</div></div>
 
 <div class="modal" id="am"><div class="box" style="max-width:820px"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Admin panel</h3><span><button class="o" id="logout">Log out</button> <button class="o" onclick="cm('am')">Close</button></span></div>
-<div class="tabs" style="margin-top:14px"><button class="o" data-t="as">Services &amp; prices</button><button class="o" data-t="ad">Designs</button><button class="o" data-t="ai">Inquiries</button></div>
-<div id="as"></div><div id="ad" hidden></div><div id="ai" hidden></div>
-<p style="font-size:12px;color:var(--mu)">Prototype: changes live in this page only and reset on reload. A backend and database make them permanent.</p></div></div>
+<div class="tabs" style="margin-top:14px"><button class="o" data-t="as">Services &amp; prices</button><button class="o" data-t="ad">Designs</button><button class="o" data-t="ai">Inquiries</button><button class="o" data-t="ac">Account</button></div>
+<div id="as"></div><div id="ad" hidden></div><div id="ai" hidden></div><div id="ac" hidden></div><div class="msg" id="st"></div>
+</div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 var $=function(i){return document.getElementById(i)};
 function cm(i){$(i).classList.remove('on')}function om(i){$(i).classList.add('on')}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+/* ===== PASTE YOUR SUPABASE DETAILS HERE ===== */
+var SB_URL='https://chnndhhcgkrspilkseqs.supabase.co/rest/v1/',SB_KEY='sb_publishable_son3JcCiYoFksq6pB6eDzA_LwPbc-9v',sb=null;
+try{if(SB_URL.indexOf('http')==0)sb=supabase.createClient(SB_URL,SB_KEY)}catch(e){}
 var services=[
 {n:'Simple designs',p:'KSh 500 – 1,000',d:'Simple posters, basic social media posts, text editing, minor logo adjustments, simple flyers and certificate editing.'},
 {n:'Standard professional designs',p:'KSh 1,000 – 3,000',d:'Business flyers, job cards, brochures, event posters, restaurant menus, church and business banners, branded social content. Includes 2–3 revisions.'},
 {n:'Premium branding designs',p:'KSh 3,000 – 10,000+',d:'Full brochures, company profiles, brand identity packages, professional logos, product catalogs and print-ready commercial work.'}];
 var extras=[['Extra revisions','KSh 200 – 500'],['Urgent / same-day work','+30% to +50%'],['Printing arrangement','Service fee'],['Source / editable files','Extra KSh 300 – 1,000'],['Social media resize versions','Extra KSh 200 – 500']];
 var gs=['#0a5cff,#2bb3ff','#111,#1ea0ff','#6a11cb,#2575fc','#00c6ff,#0072ff','#0f2027,#2c5364','#1e3c72,#2a5298'];
-var designs=[['Restaurant menu','Standard','A two-sided menu with clear sections and food photography.'],['Event poster','Standard','Bold poster for a weekend community event.'],['Company logo','Premium','Logo and colour palette delivered as a brand pack.'],['Business flyer','Standard','A5 promotional flyer, print-ready.'],['Certificate','Simple','Editable certificate layout for training courses.'],['Product catalog','Premium','Multi-page catalog with consistent grid layout.']].map(function(d,i){return{t:d[0],c:d[1],d:d[2],bg:'linear-gradient(135deg,'+gs[i%6]+')'}});
-var inq=[],cat='All',admin=false;
-function rSvc(){$('svc').innerHTML=services.map(function(s){return'<div class="card"><h3>'+esc(s.n)+'</h3><div class="price">'+esc(s.p)+'</div><p>'+esc(s.d)+'</p><a class="btn" href="#contact" onclick="pick(\''+services.indexOf(s)+'\')">Order this</a></div>'}).join('');
+var designs=sb?[]:[['Restaurant menu','Standard','A two-sided menu with clear sections.'],['Event poster','Standard','Bold poster for a community event.'],['Company logo','Premium','Logo and colour palette brand pack.'],['Business flyer','Standard','A5 promotional flyer, print-ready.']].map(function(d,i){return{t:d[0],c:d[1],d:d[2],bg:'linear-gradient(135deg,'+gs[i%6]+')'}});
+var cat='All',admin=false,BG='linear-gradient(135deg,#0a5cff,#2bb3ff)';
+async function load(){
+ if(sb){
+  var a=await sb.from('services').select('*').order('sort');
+  if(a.data&&a.data.length)services=a.data.map(function(r){return{id:r.id,n:r.name,p:r.price,d:r.description}});
+  var b=await sb.from('designs').select('*').order('created_at',{ascending:false});
+  designs=(b.data||[]).map(function(r){return{id:r.id,t:r.title,c:r.category||'Other',d:r.description,img:r.image_url,bg:BG}});
+ }
+ rSvc();rGal()}
+function rSvc(){$('svc').innerHTML=services.map(function(s,i){return'<div class="card"><h3>'+esc(s.n)+'</h3><div class="price">'+esc(s.p)+'</div><p>'+esc(s.d)+'</p><a class="btn" href="#contact" onclick="pick('+i+')">Order this</a></div>'}).join('');
 $('pt').innerHTML=services.map(function(s){return'<tr><td>'+esc(s.n)+'</td><td><b>'+esc(s.p)+'</b></td></tr>'}).join('');
 $('s').innerHTML=services.map(function(s,i){return'<option value="'+i+'">'+esc(s.n)+'</option>'}).join('')}
 function pick(i){$('s').value=i;$('t').value='Order'}
 function rEx(){$('ex').innerHTML=extras.map(function(e){return'<tr><td>'+e[0]+'</td><td><b>'+e[1]+'</b></td></tr>'}).join('')}
 function rGal(){var cs=['All'].concat(designs.map(function(d){return d.c}).filter(function(v,i,a){return a.indexOf(v)==i}));
-$('tabs').innerHTML=cs.map(function(c){return'<button class="'+(c==cat?'':'o')+'" data-c="'+esc(c)+'">'+esc(c)+'</button>'}).join('');
-$('gal').innerHTML=designs.map(function(d,i){return(cat=='All'||d.c==cat)?'<div class="tile" data-i="'+i+'" style="background-image:'+(d.img?'url('+d.img+')':d.bg)+'">'+esc(d.t)+'</div>':''}).join('')}
+$('tabs').innerHTML=cs.length>2?cs.map(function(c){return'<button class="'+(c==cat?'':'o')+'" data-c="'+esc(c)+'">'+esc(c)+'</button>'}).join(''):'';
+$('gal').innerHTML=designs.length?designs.map(function(d,i){return(cat=='All'||d.c==cat)?'<div class="tile" data-i="'+i+'" style="background-image:'+(d.img?'url(\''+esc(d.img)+'\')':d.bg)+'">'+esc(d.t)+'</div>':''}).join(''):'<p style="color:var(--mu)">New designs are coming soon.</p>'}
 $('tabs').onclick=function(e){var c=e.target.getAttribute('data-c');if(c){cat=c;rGal()}};
-$('gal').onclick=function(e){var t=e.target.closest('.tile');if(!t)return;var d=designs[t.getAttribute('data-i')];$('dbig').style.backgroundImage=d.img?'url('+d.img+')':d.bg;$('dt').textContent=d.t+' · '+d.c;$('dd').textContent=d.d;om('dm')};
-$('send').onclick=function(){var n=$('n').value.trim(),c=$('c').value.trim(),m=$('m').value.trim();var o=$('ok');
+$('gal').onclick=function(e){var t=e.target.closest('.tile');if(!t)return;var d=designs[t.getAttribute('data-i')];$('dbig').style.backgroundImage=d.img?'url(\''+d.img+'\')':d.bg;$('dt').textContent=d.t+' · '+d.c;$('dd').textContent=d.d||'';om('dm')};
+$('send').onclick=async function(){var n=$('n').value.trim(),c=$('c').value.trim(),m=$('m').value.trim(),o=$('ok');
 if(!n||!c||!m){o.style.color='#e74c3c';o.textContent='Please fill in your name, contact and message.';return}
-inq.unshift({n:n,c:c,t:$('t').value,s:services[$('s').value].n,m:m,w:new Date().toLocaleString()});
+if(sb){var r=await sb.from('inquiries').insert({name:n,contact:c,type:$('t').value,service:services[$('s').value].n,message:m});
+if(r.error){o.style.color='#e74c3c';o.textContent='Sorry, it could not be sent. Please try again.';return}}
 o.style.color='#2ecc71';o.textContent='Thank you, '+n+'! Your '+$('t').value.toLowerCase()+' was received.';$('n').value=$('c').value=$('m').value=''};
+function note(t,bad){var s=$('st');s.style.color=bad?'#e74c3c':'#2ecc71';s.textContent=t}
+async function init(){if(sb){var s=await sb.auth.getSession();admin=!!(s.data&&s.data.session)}await load()}
 $('adminBtn').onclick=function(){admin?(rAdmin(),om('am')):om('lm')};
-$('login').onclick=function(){if($('u').value=='admin'&&$('p').value=='admin123'){admin=true;cm('lm');$('p').value='';$('le').textContent='';rAdmin();om('am')}else $('le').textContent='Wrong username or password.'};
-$('logout').onclick=function(){admin=false;cm('am')};
-document.querySelector('#am .tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;['as','ad','ai'].forEach(function(x){$(x).hidden=x!=t})};
-function rAdmin(){
-$('as').innerHTML=services.map(function(s,i){return'<div class="row"><input value="'+esc(s.n)+'" data-k="n" data-i="'+i+'"><input value="'+esc(s.p)+'" data-k="p" data-i="'+i+'"><input value="'+esc(s.d)+'" data-k="d" data-i="'+i+'"><button class="d" data-del="'+i+'">Delete</button></div>'}).join('')+'<div class="row"><input id="nn" placeholder="New service"><input id="np" placeholder="Price"><input id="nd" placeholder="Description"><button id="addS">Add</button></div>';
+$('login').onclick=async function(){var e=$('le');if(!sb){e.textContent='Backend not connected yet.';return}
+var r=await sb.auth.signInWithPassword({email:$('u').value.trim(),password:$('p').value});
+if(r.error){e.textContent='Wrong email or password.';return}
+admin=true;e.textContent='';$('p').value='';cm('lm');rAdmin();om('am')};
+$('logout').onclick=async function(){if(sb)await sb.auth.signOut();admin=false;cm('am')};
+document.querySelector('#am .tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(!t)return;['as','ad','ai','ac'].forEach(function(x){$(x).hidden=x!=t})};
+async function rAdmin(){
+$('as').innerHTML=services.map(function(s,i){return'<div class="row"><input value="'+esc(s.n)+'" data-k="n" data-i="'+i+'"><input value="'+esc(s.p)+'" data-k="p" data-i="'+i+'"><input value="'+esc(s.d)+'" data-k="d" data-i="'+i+'"><span style="display:flex;gap:6px"><button data-sv="'+i+'">Save</button><button class="d" data-del="'+i+'">Delete</button></span></div>'}).join('')+'<div class="row"><input id="nn" placeholder="New service"><input id="np" placeholder="Price"><input id="nd" placeholder="Description"><button id="addS">Add</button></div>';
 $('ad').innerHTML=designs.map(function(d,i){return'<div class="row" style="grid-template-columns:2fr 1fr auto"><span>'+esc(d.t)+'</span><span>'+esc(d.c)+'</span><button class="d" data-dd="'+i+'">Remove</button></div>'}).join('')+'<div class="row" style="grid-template-columns:1fr 1fr"><input id="dn" placeholder="Design title"><input id="dc" placeholder="Category"></div><input id="dx" placeholder="Description" style="margin-bottom:8px"><input id="df" type="file" accept="image/*" style="margin-bottom:8px"><button id="addD">Upload design</button>';
-$('ai').innerHTML=inq.length?inq.map(function(q){return'<div class="card" style="margin-bottom:10px"><b>'+esc(q.t)+'</b> · '+esc(q.s)+'<br>'+esc(q.n)+' ('+esc(q.c)+') · <small>'+esc(q.w)+'</small><p style="margin:6px 0 0">'+esc(q.m)+'</p></div>'}).join(''):'<p style="color:var(--mu)">No inquiries yet.</p>'}
-$('as').oninput=function(e){var t=e.target;if(t.dataset.k){services[t.dataset.i][t.dataset.k]=t.value;rSvc()}};
-$('as').onclick=function(e){var t=e.target;if(t.dataset.del!==undefined){services.splice(t.dataset.del,1);rSvc();rAdmin()}
-if(t.id=='addS'&&$('nn').value){services.push({n:$('nn').value,p:$('np').value,d:$('nd').value});rSvc();rAdmin()}};
-$('ad').onclick=function(e){var t=e.target;if(t.dataset.dd!==undefined){designs.splice(t.dataset.dd,1);rGal();rAdmin();$('ad').hidden=false;$('as').hidden=true}
-if(t.id=='addD'&&$('dn').value){var f=$('df').files[0],add=function(img){designs.push({t:$('dn').value,c:$('dc').value||'Other',d:$('dx').value,bg:'linear-gradient(135deg,#0a5cff,#2bb3ff)',img:img});rGal();rAdmin();$('ad').hidden=false;$('as').hidden=true};
-if(f){var r=new FileReader();r.onload=function(){add(r.result)};r.readAsDataURL(f)}else add()}};
-rSvc();rEx();rGal();
+$('ac').innerHTML='<label>New password (min. 8 characters)</label><input id="np1" type="password" autocomplete="new-password" style="margin-bottom:10px"><button id="cp">Change password</button>';
+var q=[];if(sb){var r=await sb.from('inquiries').select('*').order('created_at',{ascending:false});q=r.data||[]}
+$('ai').innerHTML=q.length?q.map(function(x){return'<div class="card" style="margin-bottom:10px"><b>'+esc(x.type)+'</b> · '+esc(x.service)+'<br>'+esc(x.name)+' ('+esc(x.contact)+') · <small>'+new Date(x.created_at).toLocaleString()+'</small><p style="margin:6px 0">'+esc(x.message)+'</p><button class="d" data-qd="'+x.id+'">Delete</button></div>'}).join(''):'<p style="color:var(--mu)">No inquiries yet.</p>'}
+$('as').oninput=function(e){var t=e.target;if(t.dataset.k)services[t.dataset.i][t.dataset.k]=t.value};
+$('as').onclick=async function(e){var t=e.target,s;
+if(t.dataset.sv!==undefined){s=services[t.dataset.sv];var r=await sb.from('services').update({name:s.n,price:s.p,description:s.d}).eq('id',s.id);r.error?note(r.error.message,1):(note('Saved.'),rSvc())}
+if(t.dataset.del!==undefined){var r2=await sb.from('services').delete().eq('id',services[t.dataset.del].id);r2.error?note(r2.error.message,1):(note('Deleted.'),await load(),rAdmin())}
+if(t.id=='addS'&&$('nn').value){var r3=await sb.from('services').insert({name:$('nn').value,price:$('np').value,description:$('nd').value,sort:services.length+1});r3.error?note(r3.error.message,1):(note('Added.'),await load(),rAdmin())}};
+$('ad').onclick=async function(e){var t=e.target;
+if(t.dataset.dd!==undefined){var r=await sb.from('designs').delete().eq('id',designs[t.dataset.dd].id);r.error?note(r.error.message,1):(note('Removed.'),await load(),rAdmin())}
+if(t.id=='addD'&&$('dn').value){var f=$('df').files[0],url=null;
+if(f){var path=Date.now()+'-'+f.name.replace(/[^a-z0-9.]/gi,'_');var up=await sb.storage.from('designs').upload(path,f);if(up.error){note(up.error.message,1);return}url=sb.storage.from('designs').getPublicUrl(path).data.publicUrl}
+var r2=await sb.from('designs').insert({title:$('dn').value,category:$('dc').value||'Other',description:$('dx').value,image_url:url});
+r2.error?note(r2.error.message,1):(note('Design uploaded. Everyone can see it now.'),await load(),rAdmin())}};
+$('ai').onclick=async function(e){var id=e.target.dataset.qd;if(id){await sb.from('inquiries').delete().eq('id',id);rAdmin()}};
+$('ac').onclick=async function(e){if(e.target.id!='cp')return;var v=$('np1').value;if(v.length<8){note('Use at least 8 characters.',1);return}
+var r=await sb.auth.updateUser({password:v});r.error?note(r.error.message,1):note('Password changed.');$('np1').value=''};
+rEx();init();
 </script>
 </body>
 </html>
